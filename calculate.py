@@ -169,7 +169,7 @@ class PlanWriter:
         url = (
             f"https://{const.DOMAIN}/cat/data-sign-478s.html?"
             f"org={self.client.code}&login={const.LOGIN}&man={const.MAN}"
-            f"&regionPl=%D0%A3&yearPl={const.YEAR}"
+            f"&regionPl=%D0%A3&yearPl={const.PLAN_YEAR}"
             f"&pot_fact="
             f'{";".join(self.plan_to_write.get("write_overall_plan"))}'
             f'&pot_cond='
