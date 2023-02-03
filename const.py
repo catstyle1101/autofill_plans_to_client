@@ -1,6 +1,6 @@
 import os
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # по хорошему, dotenv используется только для разработки. Если планиурется распространение куда-то, то лучше от него избавится
 
 load_dotenv()
 

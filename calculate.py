@@ -9,10 +9,10 @@ from logger import set_logger
 class ClientParser:
     def __init__(self):
         self.client = None
-        self.logger = set_logger()
+        self.logger = set_logger() # тут и везде. это жесткая зависисоть от модуля. Лучше испольтзовать иньекцию зависимостей через параметр конструктора. Так парсеру можно будет скормить любой логгер, который обладает нужным интерфейсом
 
     def __call__(self, client_code: str) -> Client:
-        self.client = self.parse_client(client_code)
+        self.client = self.parse_client(client_code)  # вроде нигде не используется больше в классе. Нужно ли его паковать в объект? Или где-то наружу нужно отдавать клиента?
         return self.client
 
     def parse_data(
@@ -32,9 +32,9 @@ class ClientParser:
             self.logger.error(message)
             raise IndexError(message)
         plan = None
-        for i in client_additional_data.get("rows"):
-            if i.get("code") == "478":
-                year = int(i.get("val").split()[1][-4:])
+        for i in client_additional_data.get("rows"):  # что такое i? 
+            if i.get("code") == "478":  # 478 стоит сунуть в константу. Как и все остальные жестко заданные данные
+                year = int(i.get("val").split()[1][-4:])  # сложная конструкция для восприятия
                 if year != const.PLAN_YEAR:
                     continue
                 plan = Plan(id=i.get("id"), year=year)
@@ -64,7 +64,7 @@ class ClientParser:
         client_id = client.get_client_id(code_client)
         client_additional_data = client.get_additional_info(client_id)
         client_data = client.get_client_card(code_client)
-        client = ClientParser.parse_data(
+        client = ClientParser.parse_data( # тут точно нужен статический вызов? не self.parse_data(...)?
             self,
             code_client=code_client,
             client_id=client_id,
@@ -116,7 +116,7 @@ class PlanWriter:
             self.client.spk_electric
             + self.client.spk_krep
             + self.client.spk_sb
-        ) * 1000
+        ) * 1000  # тут и ниже. Эта 1000 означает одно и то же? Если да, то стопроцентная константа
 
         self.plan_to_write["plan_ours"] = (
             int(
@@ -136,7 +136,7 @@ class PlanWriter:
             for i in const.RAISE_PLAN_BY_Q
         ]
 
-        for key, share in const.SHARES_ELECTIRIC_DIVISION.items():
+        for key, share in const.SHARES_ELECTIRIC_DIVISION.items(): # я бы переписал в виде спискового выражения, как выше
             plan = list()
             for idx in range(len(const.RAISE_PLAN_BY_Q)):
                 plan.append(
@@ -163,7 +163,7 @@ class PlanWriter:
         ]
 
     def post_plans(self):
-        url = (
+        url = (  # по хорошему, это тоже должно стать константой и заполнятся тут через format
             f"https://{const.DOMAIN}/cat/data-sign-478s.html?"
             f"org={self.client.code}&login={const.LOGIN}&man={const.MAN}"
             f"&regionPl=%D0%A3&yearPl={const.PLAN_YEAR}"
