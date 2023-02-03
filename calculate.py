@@ -127,8 +127,8 @@ class PlanWriter:
         )
 
         self.plan_to_write["electric_potentials"] = [
-            int(i * self.client.spk_electric) * 1000
-            for i in const.SHARES_ELECTIRIC_DIVISION.values()
+            int(i * self.client.spk_electric * const.SHARE_CLIENT_PLAN) * 1000
+            for i in const.RAISE_PLAN_BY_Q
         ]
 
         self.plan_to_write["write_overall_plan"] = [
@@ -137,17 +137,14 @@ class PlanWriter:
         ]
 
         for key, share in const.SHARES_ELECTIRIC_DIVISION.items():
-            idx = 0
             plan = list()
-            for mul in const.RAISE_PLAN_BY_Q:
+            for idx in range(len(const.RAISE_PLAN_BY_Q)):
                 plan.append(
                     str(
                         self.plan_to_write.get("electric_potentials")[idx]
-                        * mul
                         * share
                     )
                 )
-                idx += 1
             self.plan_to_write[f"write_{key}"] = plan
 
         self.plan_to_write["write_our_plan"] = [

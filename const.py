@@ -13,6 +13,6 @@ LOGGER_NAME = 'logger'
 CLIENTS_FILE_NAME = 'clients.csv'
 CONSOLE_LOGGER_NAME = 'console_logger'
 PLAN_YEAR = 2023
-SHARE_CLIENT_PLAN = 0.33
+SHARE_CLIENT_PLAN = 0.9
 SHARES_ELECTIRIC_DIVISION = {'kpp': 0.3, 'peo': 0.1, 'st': 0.25, 'ueo': 0.35}
 RAISE_PLAN_BY_Q = (1.0, 1.03, 1.06, 1.09)
