@@ -32,9 +32,9 @@ class ClientParser:
             self.logger.error(message)
             raise IndexError(message)
         plan = None
-        for i in client_additional_data.get("rows"):
-            if i.get("code") == const.PLAN_CODE:
-                year = int(i.get("val").split()[1][-4:])
+        for data_row in client_additional_data.get("rows"):
+            if data_row.get("code") == const.PLAN_CODE:
+                year = int(data_row.get("val").split()[1][-4:])
                 if year != const.PLAN_YEAR:
                     continue
                 plan = Plan(id=i.get("id"), year=year)
