@@ -1,5 +1,4 @@
 from calculate import ClientParser, PlanWriter
-import const
 from csv_writer import CsvFile
 from logger import set_logger
 
@@ -11,7 +10,7 @@ def main():
     all_clients_count = len(list_of_clients)
     logger = set_logger()
     logger.info(f"Всего клиентов: {all_clients_count}. Начинаю работу...")
-    for idx, client_code in enumerate(list_of_clients, 1):
+    for client_code in list_of_clients:
         try:
             parser = ClientParser()
             client = parser(client_code)

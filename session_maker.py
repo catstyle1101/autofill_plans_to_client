@@ -53,26 +53,17 @@ class SessionMaker:
 class ClientScrapper(SessionMaker):
 
     def get_client_id(self, client_code):
-        url = (
-            f"https://{const.DOMAIN}/cat/data-cli.html?login={const.LOGIN}&"
-            f"man={const.MAN}&cType1=0&cType2=0&_search=true&nd="
-            f"1633502002783&rows=20&page=1&sidx=cli-name"
-            f"&sord=asc&cli-code={client_code}&_=1633502002784"
-        )
+        url = const.CLIENT_ID_URL.format(client_code=client_code)
         data = self._get_data_from_url(url)
         return data.get('rows')[0].get('id')
 
     def get_client_card(self, client_id):
-        url = (f"https://{const.DOMAIN}/cat/getrecord.html?man="
-               f"{const.MAN}&login={const.LOGIN}&org={client_id}"
-               "&mode=getrecord&syf_prog=cli-card")
+        url = const.CLIENT_CARD_URL.format(client_id=client_id)
         data = self._get_data_from_url(url)
         return data
 
     def get_additional_info(self, client_id: str):
-        url = (f"https://{const.DOMAIN}/cat/data-sign.html?file-code=7&"
-               f"id={client_id}&_search=false&rows=1000&page=1"
-               f"&sidx=name+desc,+&sord=asc&_=1675164424792")
+        url = const.CLIENT_ADD_CARD_URL.format(client_id=client_id)
         data = self._get_data_from_url(url)
         return data
 

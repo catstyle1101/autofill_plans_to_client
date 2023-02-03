@@ -1,15 +1,15 @@
 import requests
+import logging
 
 import const
 from models import Client, Potential, Plan
 from session_maker import ClientScrapper
-from logger import set_logger
 
 
 class ClientParser:
     def __init__(self):
         self.client = None
-        self.logger = set_logger()
+        self.logger = logging.getLogger(const.LOGGER_NAME)
 
     def __call__(self, client_code: str) -> Client:
         self.client = self.parse_client(client_code)
@@ -33,7 +33,7 @@ class ClientParser:
             raise IndexError(message)
         plan = None
         for i in client_additional_data.get("rows"):
-            if i.get("code") == "478":
+            if i.get("code") == const.PLAN_CODE:
                 year = int(i.get("val").split()[1][-4:])
                 if year != const.PLAN_YEAR:
                     continue
@@ -64,8 +64,7 @@ class ClientParser:
         client_id = client.get_client_id(code_client)
         client_additional_data = client.get_additional_info(client_id)
         client_data = client.get_client_card(code_client)
-        client = ClientParser.parse_data(
-            self,
+        client = self.parse_data(
             code_client=code_client,
             client_id=client_id,
             client_data=client_data,
@@ -104,30 +103,30 @@ class ClientParser:
 
 class PlanWriter:
 
-    logger = set_logger()
-
     def __init__(self, client: Client):
         self.client = client
         self.plan_to_write = dict()
         self.calculate_plan()
+        self.logger = logging.getLogger(const.LOGGER_NAME)
 
     def calculate_plan(self):
         self.plan_to_write["overall_potential"] = (
             self.client.spk_electric
             + self.client.spk_krep
             + self.client.spk_sb
-        ) * 1000
+        ) * const.THOUSANDS
 
         self.plan_to_write["plan_ours"] = (
             int(
                 self.plan_to_write.get("overall_potential")
                 * const.SHARE_CLIENT_PLAN
             )
-            * 1000
+            * const.THOUSANDS
         )
 
         self.plan_to_write["electric_potentials"] = [
-            int(i * self.client.spk_electric * const.SHARE_CLIENT_PLAN) * 1000
+            int(i * self.client.spk_electric
+                * const.SHARE_CLIENT_PLAN) * const.THOUSANDS
             for i in const.RAISE_PLAN_BY_Q
         ]
 
@@ -153,37 +152,28 @@ class PlanWriter:
         ]
 
         self.plan_to_write["write_sb"] = [
-            str(i * self.client.spk_sb * const.SHARE_CLIENT_PLAN * 1000)
+            str(i * self.client.spk_sb * const.SHARE_CLIENT_PLAN
+                * const.THOUSANDS)
             for i in const.RAISE_PLAN_BY_Q
         ]
 
         self.plan_to_write["write_krep"] = [
-            str(i * self.client.spk_krep * const.SHARE_CLIENT_PLAN * 1000)
+            str(i * self.client.spk_krep * const.SHARE_CLIENT_PLAN
+                * const.THOUSANDS)
             for i in const.RAISE_PLAN_BY_Q
         ]
 
     def post_plans(self):
-        url = (
-            f"https://{const.DOMAIN}/cat/data-sign-478s.html?"
-            f"org={self.client.code}&login={const.LOGIN}&man={const.MAN}"
-            f"&regionPl=%D0%A3&yearPl={const.PLAN_YEAR}"
-            f"&pot_fact="
-            f'{";".join(self.plan_to_write.get("write_overall_plan"))}'
-            f'&pot_cond='
-            f'{";".join(self.plan_to_write.get("write_our_plan"))}'
-            f'&clsAdmit_1=11;'
-            f'{";".join(self.plan_to_write.get("write_kpp"))};'
-            f'&clsAdmit_2=13;'
-            f'{";".join(self.plan_to_write.get("write_peo"))};'
-            f'&clsAdmit_3=14;'
-            f'{";".join(self.plan_to_write.get("write_st"))};'
-            f'&clsAdmit_4=16;'
-            f'{";".join(self.plan_to_write.get("write_ueo"))};'
-            f"&clsAdmit_5=1%D0%91;"
-            f'{";".join(self.plan_to_write.get("write_sb"))};'
-            f"&clsAdmit_6=1F;0;0;0;0;&clsAdmit_7=1S;"
-            f'{";".join(self.plan_to_write.get("write_krep"))};'
-            f"&clsAdmitCnt=7&oper="
+        url = const.WRITE_PLAN_URL.format(
+            client_code=self.client.code,
+            plan=";".join(self.plan_to_write.get("write_overall_plan")),
+            our_plan=";".join(self.plan_to_write.get("write_our_plan")),
+            kpp=";".join(self.plan_to_write.get("write_kpp")),
+            peo=";".join(self.plan_to_write.get("write_peo")),
+            st=";".join(self.plan_to_write.get("write_st")),
+            ueo=";".join(self.plan_to_write.get("write_ueo")),
+            sb=";".join(self.plan_to_write.get("write_sb")),
+            krep=";".join(self.plan_to_write.get("write_krep")),
         )
         if self.client.plan_id:
             add = f"edit&id={self.client.plan_id.id}"
