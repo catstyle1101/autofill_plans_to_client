@@ -37,7 +37,7 @@ class ClientParser:
                 year = int(data_row.get("val").split()[1][-4:])
                 if year != const.PLAN_YEAR:
                     continue
-                plan = Plan(id=i.get("id"), year=year)
+                plan = Plan(id=data_row.get("id"), year=year)
         client = Client(
             client_id=client_id,
             code=code_client,
@@ -152,14 +152,14 @@ class PlanWriter:
         ]
 
         self.plan_to_write["write_sb"] = [
-            str(i * self.client.spk_sb * const.SHARE_CLIENT_PLAN
-                * const.THOUSANDS)
+            str(int(i * self.client.spk_sb * const.SHARE_CLIENT_PLAN
+                * const.THOUSANDS))
             for i in const.RAISE_PLAN_BY_Q
         ]
 
         self.plan_to_write["write_krep"] = [
-            str(i * self.client.spk_krep * const.SHARE_CLIENT_PLAN
-                * const.THOUSANDS)
+            str(int(i * self.client.spk_krep * const.SHARE_CLIENT_PLAN
+                * const.THOUSANDS))
             for i in const.RAISE_PLAN_BY_Q
         ]
 
