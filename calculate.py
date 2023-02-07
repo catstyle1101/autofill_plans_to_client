@@ -15,6 +15,8 @@ class ClientParser:
         self.logger = logging.getLogger(const.LOGGER_NAME)
 
     def __call__(self, client_code: str) -> Client:
+        if not str(client_code).isdigit():
+            raise ValueError
         self.client = self.parse_client(client_code)
         return self.client
 
@@ -24,7 +26,7 @@ class ClientParser:
         client_id: str,
         client_data: list[dict],
         client_additional_data: dict,
-    ) -> Client:
+    ) -> Client | None:
         try:
             row = client_data[0]
         except IndexError:
@@ -66,8 +68,10 @@ class ClientParser:
             plan_id=plan,
             manager=manager,
         )
-        self.validate_client_spk(client)
-        return client
+        if self.validate_client_spk(client):
+            return client
+        else:
+            return CsvFile().add_error_client_to_csv(client)
 
     def parse_client(self, code_client: str) -> Client:
         client = ClientScrapper()
@@ -80,8 +84,7 @@ class ClientParser:
             client_data=client_data,
             client_additional_data=client_additional_data,
         )
-        if self.validate_client_spk(client):
-            return client
+        return client
 
     def validate_client_spk(self, client: Client) -> bool:
         for potential, spk in (
@@ -97,7 +100,7 @@ class ClientParser:
                     f"{potential.name}, надо изменить"
                 )
                 self.logger.error(message)
-                raise ValueError(message)
+                return False
             elif not potential.value.min <= spk <= potential.value.max:
                 message = const.SPK_ERROR_MESSAGE.format(
                     manager=client.manager,
@@ -109,9 +112,7 @@ class ClientParser:
                     potential_value_max=potential.value.max,
                 )
                 self.logger.error(message)
-                csv_file = CsvFile()
-                csv_file.add_error_client_to_csv(client)
-                raise ValueError(message)
+                return False
         return True
 
 
