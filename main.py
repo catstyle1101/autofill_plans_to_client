@@ -1,6 +1,7 @@
 from calculate import ClientParser, PlanWriter
 from csv_writer import CsvFile
 from logger import set_logger
+from models import CountClients
 
 
 def main():
@@ -14,7 +15,8 @@ def main():
         try:
             parser = ClientParser()
             client = parser(client_code)
-            PlanWriter(client).post_plans()
+            if client:
+                PlanWriter(client).post_plans()
         except ValueError:
             ...
         except Exception as e:
