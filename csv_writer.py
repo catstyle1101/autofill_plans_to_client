@@ -1,7 +1,10 @@
 import csv
+import os
 
 import const
 from logger import set_logger
+
+from models import Client
 
 
 class CsvFile:
@@ -28,10 +31,20 @@ class CsvFile:
             self.logger.info("Список клиентов пуст")
         return list_of_clients
 
-    def rewrite_clients_csv(self, client_list):
-        with open(const.CLIENTS_FILE_NAME, "w",
+    def wipe_error_csv(self):
+        with open(const.CLIENTS_ERROR_FILE_NAME, "w",
+                  encoding='windows-1251', newline='') as f:
+            writer = csv.writer(f, delimiter=";")
+            writer.writerow(('Код клиента', 'Название клиента', 'Менеджер'))
+
+    def rewrite_clients_csv(self):
+        os.remove(const.CLIENTS_FILE_NAME)
+        os.rename(const.CLIENTS_ERROR_FILE_NAME, const.CLIENTS_FILE_NAME)
+        self.logger.info(
+                f"Файл {const.CLIENTS_FILE_NAME} с отчетом сформирован")
+
+    def add_error_client_to_csv(self, client: Client):
+        with open(const.CLIENTS_ERROR_FILE_NAME, "a",
                   encoding="windows-1251", newline='') as f:
-            writer = csv.writer(f, dialect="excel")
-            for row in client_list:
-                writer.writerow((row,))
-            self.logger.info(f"Файл {const.CLIENTS_FILE_NAME} перезаписан")
+            writer = csv.writer(f, delimiter=";")
+            writer.writerow((client.code, client.name, client.manager))

@@ -4,13 +4,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-INDEX_SUM = 14
 DOMAIN = os.getenv('DOMAIN')
 LOGIN_URL = os.getenv('LOGIN_URL')
 LOGIN = os.getenv('USER')
 MAN = os.getenv('MAN')
 LOGGER_NAME = 'logger'
 CLIENTS_FILE_NAME = 'clients.csv'
+CLIENTS_ERROR_FILE_NAME = 'errors.csv'
 CONSOLE_LOGGER_NAME = 'console_logger'
 PLAN_CODE = "478"
 PLAN_YEAR = 2023
@@ -37,10 +37,29 @@ CLIENT_ID_URL = (
 CLIENT_CARD_URL = (
     f"https://{DOMAIN}/cat/getrecord.html?man="
     f"{MAN}&login={LOGIN}&org="
-    "{client_id}&mode=getrecord&syf_prog=cli-card"
+    "{client_code}&mode=getrecord&syf_prog=cli-card"
 )
 CLIENT_ADD_CARD_URL = (
     f"https://{DOMAIN}/cat/data-sign.html?file-code=7&"
     "id={client_id}&_search=false&rows=1000&page=1"
     "&sidx=name+desc,+&sord=asc&_=1675164424792"
+)
+SPK_ERROR_MESSAGE = (
+    "Менеджер: {manager} "
+    "Клиент {client_code} {client_name}: "
+    "Потенциал {potential_name} не "
+    "соответствует СПК {spk} "
+    "рамки: от {potential_value_min} до "
+    "{potential_value_max}"
+)
+SUCCESS_WRITE_MESSAGE = (
+    "({count}) "
+    "Клиент: {client_code}, {client_name} "
+    "- план на {client_plan_id_year} год записан"
+)
+ERROR_WRITE_MESSAGE = (
+    "({count}) "
+    "План клиенту {client_code}, "
+    "{client_name} "
+    "Не записан"
 )

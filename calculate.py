@@ -1,12 +1,15 @@
+import re
 import requests
 import logging
 
 import const
+from csv_writer import CsvFile
 from models import Client, Potential, Plan
 from session_maker import ClientScrapper
 
 
 class ClientParser:
+
     def __init__(self):
         self.client = None
         self.logger = logging.getLogger(const.LOGGER_NAME)
@@ -38,6 +41,12 @@ class ClientParser:
                 if year != const.PLAN_YEAR:
                     continue
                 plan = Plan(id=data_row.get("id"), year=year)
+        manager = re.search(r'^[а-яА-я]+ [А-Я]\.[А-Я]\.',
+                            row.get("class_name37"))
+        if manager:
+            manager = manager.group()
+        else:
+            manager = "Не определен"
         client = Client(
             client_id=client_id,
             code=code_client,
@@ -55,6 +64,7 @@ class ClientParser:
             spk_krep=int(row.get("cli_173_potent_d")),
             spk_sb=int(row.get("cli_174_potent_d")),
             plan_id=plan,
+            manager=manager,
         )
         self.validate_client_spk(client)
         return client
@@ -89,14 +99,18 @@ class ClientParser:
                 self.logger.error(message)
                 raise ValueError(message)
             elif not potential.value.min <= spk <= potential.value.max:
-                message = (
-                    f"Клиент {client.code} {client.name}: "
-                    f"Потенциал {potential.name} не "
-                    f"соответствует СПК {spk} "
-                    f"рамки: от {potential.value.min} до "
-                    f"{potential.value.max}"
+                message = const.SPK_ERROR_MESSAGE.format(
+                    manager=client.manager,
+                    client_code=client.code,
+                    client_name=client.name,
+                    potential_name=potential.name,
+                    spk=spk,
+                    potential_value_min=potential.value.min,
+                    potential_value_max=potential.value.max,
                 )
                 self.logger.error(message)
+                csv_file = CsvFile()
+                csv_file.add_error_client_to_csv(client)
                 raise ValueError(message)
         return True
 
@@ -182,10 +196,17 @@ class PlanWriter:
         url += add
         result = requests.get(url)
         if result.text == 'success':
-            message = (f"Клиент: {self.client.code}, {self.client.name} "
-                       f"- план на {self.client.plan_id.year} год записан")
+            message = const.SUCCESS_WRITE_MESSAGE.format(
+                count=self.client.count,
+                client_code=self.client.code,
+                client_name=self.client.name,
+                client_plan_id_year=self.client.plan_id.year,
+            )
             self.logger.info(message)
         else:
-            self.logger.error(f"План клиенту {self.client.code}, "
-                              f"{self.client.name} "
-                              "Не записан")
+            message = const.ERROR_WRITE_MESSAGE.format(
+
+                client_code=self.client.code,
+                client_name=self.client.name,
+            )
+            self.logger.error(message)

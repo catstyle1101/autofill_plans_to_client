@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import NamedTuple
+from typing import ClassVar, NamedTuple
 
 
 @dataclass
@@ -35,6 +35,15 @@ class Potential(Enum):
     aR = PotentialRange(None, None)
 
 
+class CountClients:
+
+    _count = 1
+
+    def __init__(self):
+        CountClients._count += 1
+        self.id = CountClients._count
+
+
 @dataclass
 class Client:
     client_id: str
@@ -47,3 +56,8 @@ class Client:
     spk_krep: int
     spk_sb: int
     plan_id: Plan | None
+    manager: str | None
+    count: ClassVar[int] = 0
+
+    def __post_init__(self):
+        Client.count += 1

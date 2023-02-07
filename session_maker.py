@@ -57,8 +57,8 @@ class ClientScrapper(SessionMaker):
         data = self._get_data_from_url(url)
         return data.get('rows')[0].get('id')
 
-    def get_client_card(self, client_id):
-        url = const.CLIENT_CARD_URL.format(client_id=client_id)
+    def get_client_card(self, client_code):
+        url = const.CLIENT_CARD_URL.format(client_code=client_code)
         data = self._get_data_from_url(url)
         return data
 
