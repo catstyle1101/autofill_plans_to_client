@@ -36,7 +36,7 @@ class ClientParser:
             )
             self.logger.error(message)
             raise IndexError(message)
-        plan = None
+        plan = Plan(id='', year=const.PLAN_YEAR)
         for data_row in client_additional_data.get("rows"):
             if data_row.get("code") == const.PLAN_CODE:
                 year = int(data_row.get("val").split()[1][-4:])
@@ -92,9 +92,7 @@ class ClientParser:
             (client.potential_krep, client.spk_krep),
             (client.potential_sb, client.spk_sb),
         ):
-            if spk != 0 and (
-                potential.value.min is None or potential.value.max is None
-            ):
+            if potential.value.min is None or potential.value.max is None:
                 message = (
                     f"Клиент {client.code} {client.name}: Потенциал "
                     f"{potential.name}, надо изменить"
@@ -190,7 +188,7 @@ class PlanWriter:
             sb=";".join(self.plan_to_write.get("write_sb")),
             krep=";".join(self.plan_to_write.get("write_krep")),
         )
-        if self.client.plan_id:
+        if self.client.plan_id.id != '':
             add = f"edit&id={self.client.plan_id.id}"
         else:
             add = "add"
