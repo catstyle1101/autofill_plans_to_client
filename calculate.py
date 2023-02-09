@@ -87,6 +87,7 @@ class ClientParser:
         return client
 
     def validate_client_spk(self, client: Client) -> bool:
+        has_errors = False
         for potential, spk in (
             (client.potential_electric, client.spk_electric),
             (client.potential_krep, client.spk_krep),
@@ -98,7 +99,7 @@ class ClientParser:
                     f"{potential.name}, надо изменить"
                 )
                 self.logger.error(message)
-                return False
+                has_errors = True
             elif not potential.value.min <= spk <= potential.value.max:
                 message = const.SPK_ERROR_MESSAGE.format(
                     manager=client.manager,
@@ -110,8 +111,8 @@ class ClientParser:
                     potential_value_max=potential.value.max,
                 )
                 self.logger.error(message)
-                return False
-        return True
+                has_errors = True
+        return not has_errors
 
 
 class PlanWriter:
