@@ -12,6 +12,7 @@ Autofills client plan to system by quartals
 setup .env file (example in repo)
 
 run `python main.py`
+run with manual list of clients `python main.py -l 1234,123124`
 
 ## Stack
 

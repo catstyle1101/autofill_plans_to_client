@@ -12,6 +12,7 @@ class CsvFile:
     def __init__(self):
         self.logger = set_logger()
         self.list_of_clients = self.get_list_of_clients()
+        self.wipe_error_csv()
 
     def get_list_of_clients(self):
         list_of_clients = list()
@@ -28,7 +29,7 @@ class CsvFile:
             self.logger.critical(f"Файл {const.CLIENTS_FILE_NAME} не найден")
             raise e
         if list_of_clients == []:
-            self.logger.info("Список клиентов пуст")
+            self.logger.info("Список клиентов в csv файле пуст")
         return list_of_clients
 
     def wipe_error_csv(self):
